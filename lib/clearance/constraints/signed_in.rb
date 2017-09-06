@@ -41,7 +41,12 @@ module Clearance
 
       # @api private
       def current_user_fulfills_additional_requirements?
-        @block.call current_user
+        impersonated_user = ActiveRecord::Base::User.find_by(id: @request.session[:impersonated_user_id])
+        if impersonated_user.present? && current_user != impersonated_user
+          @block.call impersonated_user
+        else
+          @block.call current_user
+        end
       end
 
       # @api private
